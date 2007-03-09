@@ -1,0 +1,85 @@
+** Intro
+
+For years i've been reading book after book on Dan Cotters excellent text reader. I guess it's still available on the net somewhere. It's a wonderful program and i was surprised that reading books on your gba is actually quite comfortable. But when you use an app so often, the little imperfections get rather annoying. All of the following irritations/imperfections, except for the bookmarking and text-breaking, have been addressed by this software, together with reimplementing the stuff that worked of course:
+
+- can be loaded on my xg-flash1 cart but is invisible when i want to put another app on it, so i have to load it again while my savedata is lost.
+- no native linux book-on-cart-baking mechanism
+- buggy skipping forwards/backwards in text
+- unskippable intro
+- freezes text a screen from the end so you can never read the end
+- always saves state on every keypress
+- only one book at a time
+- no bookmarks
+- doesn't break off text longer than the screen
+
+But i kept the font. Actually i copied the font pixel for pixel in the gimp from screenshots i made of an emulator running Cotter's program. Wrote down the position of every-one of them in every glyph and let a little c++ program parse it. What a job! What do i look like? A monk? Well you wouldn't know of course. Could be. So now i should be able to do all sorts of transformations with the text. But i didn't. So what was the point? I don't know. Seemed like a cool idea at the time...
+
+
+** License - LGPL, see the LICENSE file in this directory
+
+
+** Author - Ties Stuij (except the gbfs stuff and some of the header files)
+
+
+** Installation
+
+Get the packed up version at:
+http://redrepublic.org/bins/bookbaker.zip
+or
+http://redrepublic.org/bins/bookbaker.tar.gz
+
+To get the latest development version, do a darcs get:
+darcs get http://redrepublic.org/repos/bookbaker
+
+That's all.
+
+
+** book preparation
+
+First know that this program is meant for latin-1 formatted text. So first format your text with your favorite text convert program. I use emacs and i'd recommend it to you. And learn some elisp while you're at it, it's a cool language.
+
+The general idea is that you rename your text file text.txt and put it in the oven folder. Run bake.sh for linux/unix-like or bake.bat for windows, both to be found in the oven folder and you'll find your book.gba file in that same folder. That's it. Load it on your gba, DS or emulator and you're good to go.
+
+If you want to set breakpoints in the text to which you can skip (for chapter starts and such), put a tilde (~) at the beginning of the lines you want to skip to.
+
+For more finegrained control: Bookbaker makes use of the gbfs library by pin eight, which is included in this release. The above mentioned shellscript/bat just puts the text.txt file in a .gbfs file with the help of the gbfs program in the tools subfolder in the gbfs folder. This file is simply concatenated to the end of book.pre.gba in the src directory, and the resulting file is dropped in the oven folder. The resulting book.gba file searches for the text.txt file inside the book.gba file (well, it searches for a string really). So you can just as well put a few files after the text.txt file with the help of the gbfs folder yourself and paste it behind book.pre.gba. For help on gbfs and other .gbfs manipulation tools, see the readme in the gbfs folder.
+
+
+** control
+
+a, l and r - scroll one screen forward
+b - scrolls one screen backward
+start - saves the page you're on
+right - searches forward to the next ~
+left - searches backward to the previous ~
+
+
+** Technical notes
+
+The code for the book.gba file is to be found in the src folder. Run make to compile it with devkitARM. Latest tested version: devkitARM 20
+
+The code for the font.c file is to be found in the font subdir in the src dir. The program that makes the file is called fontfilemaker. The source for this file is called font.cc, run make to make fontfilemaker. Run fontfilemaker to make font.c. Confusing? Yes. Sorry. And sorry for the occasional comment in Dutch.
+
+The code is pretty straight-forward. The most fun things were how to en- and decode the font and how to keep track of the backbuffer hocuspocus when switching from backwards to forwards. To help you/me a bit with the latter, the little graph below should clear/has cleared up the confusion:
+
+-o----------o----------o----------o----------o----------o- <- on-screen chuncks
+
+-o----------o----------o---->>----o---->>----o----------o <-- forwards
+                    oldest older offs
+
+                       |----------| <-- text on screen
+
+-o----------o----<<----o----<<----o----------o----------o <-- backwards
+           offs older oldest
+
+todo:
+- bookmarks
+- option to switch between manual save and automatic save
+- make shellscript a bit more advance, to for example accept files as   commandline arguments.
+
+- slow down page flipping (maybe)
+- enable tabs
+- break off words which are longer than the screen
+
+- change wait loop to irq loop or summ.
+- check sizeof.. used on data-lenghts not known at compile time? 
